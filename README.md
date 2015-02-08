@@ -3,5 +3,6 @@
 Pretty straight forward little website.
 
 ```ruby
-loop { open('http://numbersstation.blue/') {|f| f.read.to_i.chr }; sleep 1 }
+require 'open-uri'
+loop { puts open('http://numbersstation.blue/') {|f| f.read.to_i.chr }; sleep 1 }
 ```
