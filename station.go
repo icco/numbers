@@ -10,7 +10,7 @@ import (
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	dat, err := ioutil.ReadFile("neuromancer.txt")
+	dat, err := ioutil.ReadFile("book.txt")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
