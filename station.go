@@ -15,14 +15,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	length := len(dat)
+	text := string(dat)
+	length := len(text)
 	seconds := float64(604800)
 	now := time.Now().UTC()
 	seconds_passed := now.Second() + (now.Minute() * 60) + (now.Hour() * 3600) + (int(now.Weekday()) * 86400)
 	lookup := int((float64(seconds_passed) / seconds) * float64(length))
-	char := rune(dat[lookup])
+	char := rune(text[lookup])
 
-	log.Printf("(%v / %v) * %d = %d: %s (%d)", seconds, seconds_passed, length, lookup, string(char), char)
+	log.Printf("(%v / %v) * %d = %d: %s (%d)", seconds_passed, seconds, length, lookup, string(char), char)
 	fmt.Fprintf(w, "%d", char)
 }
 
