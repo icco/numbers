@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -12,7 +13,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	fmt.Fprintf(w, "file is %d", len(dat))
+	length := len(dat)
+	seconds := float64(604800)
+	now := time.Now().UTC()
+	seconds_passed := now.Second() + (now.Minute() * 60) + (now.Hour() * 3600) + (int(now.Weekday()) * 86400)
+	lookup := int((float64(seconds_passed) / seconds) * float64(length))
+
+	fmt.Fprintf(w, "file is %d, seconds are %d of %d. %d is %s", length, seconds_passed, seconds, lookup, string(dat[lookup]))
 }
 
 func main() {
