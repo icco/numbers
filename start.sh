@@ -1,4 +1,6 @@
-#! /bin/sh
+#! /bin/bash
+
+export DEBIAN_FRONTEND=noninteractive 
 
 sudo aptitude update
 sudo aptitude install -y golang git
