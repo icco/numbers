@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -25,7 +26,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%d", char)
 }
 
-func main() {
+func init() {
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(":8080", nil)
+}
+
+func main() {
+	numbPtr := flag.Int("p", 8080, "Port to run on")
+	flag.Parse()
+
+	where := ":http"
+	if *numbPtr != 80 {
+		where = fmt.Sprintf(":%d", *numbPtr)
+	}
+
+	log.Fatal(http.ListenAndServe(where, nil))
 }
