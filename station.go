@@ -1,12 +1,22 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
+
+	"contrib.go.opencensus.io/exporter/stackdriver"
+	"contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
+	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	"github.com/icco/numbers/lib"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/stats/view"
+	"go.opencensus.io/trace"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -28,22 +38,61 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	lookup := int64((float64(seconds_passed) / seconds) * float64(length))
 	char := rune(text[lookup])
 
-	log.Printf("(%v / %v) * %d = %d: %s (%d)", seconds_passed, seconds, length, lookup, string(char), char)
+	log.Debugf("(%v / %v) * %d = %d: %s (%d)", seconds_passed, seconds, length, lookup, string(char), char)
 	fmt.Fprintf(w, "%d", char)
 }
 
-func init() {
-	http.HandleFunc("/", handler)
-}
-
 func main() {
-	numbPtr := flag.Int("p", 8080, "Port to run on")
-	flag.Parse()
+	port := "8080"
+	if fromEnv := os.Getenv("PORT"); fromEnv != "" {
+		port = fromEnv
+	}
+	log.Infof("Starting up on http://localhost:%s", port)
 
-	where := ":http"
-	if *numbPtr != 80 {
-		where = fmt.Sprintf(":%d", *numbPtr)
+	if os.Getenv("ENABLE_STACKDRIVER") != "" {
+		labels := &stackdriver.Labels{}
+		labels.Set("app", "relay", "The name of the current app.")
+		sd, err := stackdriver.NewExporter(stackdriver.Options{
+			ProjectID:               "icco-cloud",
+			MonitoredResource:       monitoredresource.Autodetect(),
+			DefaultMonitoringLabels: labels,
+			DefaultTraceAttributes:  map[string]interface{}{"app": "relay"},
+		})
+
+		if err != nil {
+			log.WithError(err).Fatalf("failed to create the stackdriver exporter")
+		}
+		defer sd.Flush()
+
+		view.RegisterExporter(sd)
+		trace.RegisterExporter(sd)
+		trace.ApplyConfig(trace.Config{
+			DefaultSampler: trace.AlwaysSample(),
+		})
 	}
 
-	log.Fatal(http.ListenAndServe(where, nil))
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Recoverer)
+	r.Use(lib.LoggingMiddleware())
+
+	r.Get("/", handler)
+
+	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("hi."))
+	})
+
+	h := &ochttp.Handler{
+		Handler:     r,
+		Propagation: &propagation.HTTPFormat{},
+	}
+	if err := view.Register([]*view.View{
+		ochttp.ServerRequestCountView,
+		ochttp.ServerResponseCountByStatusCode,
+	}...); err != nil {
+		log.WithError(err).Fatal("Failed to register ochttp views")
+	}
+
+	log.Fatal(http.ListenAndServe(":"+port, h))
 }
