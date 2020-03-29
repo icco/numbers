@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -17,6 +16,10 @@ import (
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
+)
+
+var (
+	log = lib.InitLogging()
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
