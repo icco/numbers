@@ -48,7 +48,7 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.RealIP)
-	r.Use(logging.Middleware(log.Desugar(), cron.GCPProject))
+	r.Use(logging.Middleware(log.Desugar(), "icco-cloud"))
 
 	r.Get("/", handler)
 
