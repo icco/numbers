@@ -72,10 +72,10 @@ func GetCharacter() (*Data, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error reading file: %w", err)
 	}
+	text := string(dat)
 
 	d := &Data{}
 
-	text := string(dat)
 	d.Length = int64(len(text))
 	d.Seconds = int64(time.Hour * 24 * 7)
 	now := time.Now().UTC()
@@ -85,7 +85,7 @@ func GetCharacter() (*Data, error) {
 		(int64(now.Hour()) * int64(time.Hour)) +
 		(int64(now.Weekday()) * int64(time.Hour*24)))
 
-	d.Lookup = (d.SecondsPassed / d.Seconds) * d.Length
+	d.Lookup = int64((float64(d.SecondsPassed) / float64(d.Seconds)) * float64(d.Length))
 	d.Character = rune(text[d.Lookup])
 
 	log.Debugf(d.Log())
