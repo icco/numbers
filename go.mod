@@ -3,7 +3,7 @@ module github.com/icco/numbers
 go 1.23
 
 require (
-	github.com/go-chi/chi/v5 v5.2.0
+	github.com/go-chi/chi/v5 v5.2.1
 	github.com/icco/gutil v0.0.0-20231226055340-e0dfddaad70c
 )
 
