@@ -5,8 +5,8 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/go-chi/chi/v5 v5.2.2 h1:CMwsvRVTbXVytCk1Wd72Zy1LAsAh9GxMmSNWLHCG618=
 github.com/go-chi/chi/v5 v5.2.2/go.mod h1:L2yAIGWB3H+phAw1NxKwWM+7eUH/lU8pOMm5hHcoops=
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
-github.com/icco/gutil v0.0.0-20231226055340-e0dfddaad70c h1:ikTvnERNW0SovckIcyZjsqdpqC8ZHXbZdTnXyy5oBFg=
-github.com/icco/gutil v0.0.0-20231226055340-e0dfddaad70c/go.mod h1:67ZPs0JW1qmJ4x0YtxdrRng/SBPuJkFGtTGZlCKZ+XY=
+github.com/icco/gutil v0.0.0-20250523221334-351f1696528b h1:DTaKwX+ED2RWyOe0Tq2socXDJa0Pl0zO7OJahy7Ct8A=
+github.com/icco/gutil v0.0.0-20250523221334-351f1696528b/go.mod h1:RXUicFO3Xdb1VZwC8WSf7GvxDteuW+nZ+0O2JacoP0Y=
 github.com/icco/zapdriver v1.4.0 h1:ACpofOtnSJT9eywNOoTuEhzo7YtFUGCc4xBXYFWYMkI=
 github.com/icco/zapdriver v1.4.0/go.mod h1:M9vTLsSlL3ciV1RK6uK9O/0zAdqNNIZ3n74qdCHvAl8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=

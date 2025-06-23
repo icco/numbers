@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/go-chi/chi/v5 v5.2.2
-	github.com/icco/gutil v0.0.0-20231226055340-e0dfddaad70c
+	github.com/icco/gutil v0.0.0-20250523221334-351f1696528b
 )
 
 require (
