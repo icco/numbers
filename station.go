@@ -25,6 +25,7 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.RealIP)
+	r.Use(middleware.Recoverer)
 	r.Use(logging.Middleware(log.Desugar(), "icco-cloud"))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
@@ -52,9 +53,18 @@ func main() {
 		w.Write([]byte("hi."))
 	})
 
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	srv := &http.Server{
+		Addr:              ":" + port,
+		Handler:           r,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
+	log.Fatal(srv.ListenAndServe())
 }
 
+// Data holds a single character lookup result derived from the current time.
 type Data struct {
 	Character     rune  `json:"character"`
 	SecondsPassed int64 `json:"seconds_passed"`
@@ -67,6 +77,13 @@ func (d *Data) Log() string {
 	return fmt.Sprintf("(%v / %v) * %d = %d: %s (%d)", d.SecondsPassed, d.Seconds, d.Length, d.Lookup, string(d.Character), d.Character)
 }
 
+// GetCharacter returns the character in book.txt that corresponds to the
+// current position within the week.
+//
+// The nanosecond component of now.Nanosecond() means SecondsPassed can
+// exceed Seconds by up to 999_999_999 ns, making the raw Lookup index
+// equal to (or greater than) Length.  The clamp below prevents the
+// resulting index out-of-range panic.
 func GetCharacter() (*Data, error) {
 	dat, err := os.ReadFile("book.txt")
 	if err != nil {
@@ -86,6 +103,14 @@ func GetCharacter() (*Data, error) {
 		(int64(now.Weekday()) * int64(time.Hour*24)))
 
 	d.Lookup = int64((float64(d.SecondsPassed) / float64(d.Seconds)) * float64(d.Length))
+
+	// Clamp: floating-point rounding can make Lookup == Length (or rarely
+	// larger) during the final nanosecond of Saturday night UTC, causing a
+	// panic on the slice access below.
+	if d.Lookup >= d.Length {
+		d.Lookup = d.Length - 1
+	}
+
 	d.Character = rune(text[d.Lookup])
 
 	log.Debugf(d.Log())
