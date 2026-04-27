@@ -8,8 +8,8 @@ import (
 	"time"
 
 	chi "github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/icco/gutil/logging"
+	"go.uber.org/zap"
 )
 
 var (
@@ -24,13 +24,13 @@ func main() {
 	log.Infow("Starting up", "host", fmt.Sprintf("http://localhost:%s", port))
 
 	r := chi.NewRouter()
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Recoverer)
-	r.Use(logging.Middleware(log.Desugar(), "icco-cloud"))
+	r.Use(logging.Middleware(log.Desugar()))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		d, err := GetCharacter()
+		l := logging.FromContext(r.Context())
+		d, err := GetCharacter(l)
 		if err != nil {
+			l.Errorw("get character", zap.Error(err))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -39,18 +39,24 @@ func main() {
 	})
 
 	r.Get("/json", func(w http.ResponseWriter, r *http.Request) {
-		d, err := GetCharacter()
+		l := logging.FromContext(r.Context())
+		d, err := GetCharacter(l)
 		if err != nil {
+			l.Errorw("get character", zap.Error(err))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(d)
+		if err := json.NewEncoder(w).Encode(d); err != nil {
+			l.Errorw("encode json", zap.Error(err))
+		}
 	})
 
 	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hi."))
+		if _, err := w.Write([]byte("hi.")); err != nil {
+			logging.FromContext(r.Context()).Errorw("write healthz", zap.Error(err))
+		}
 	})
 
 	srv := &http.Server{
@@ -84,7 +90,7 @@ func (d *Data) Log() string {
 // exceed Seconds by up to 999_999_999 ns, making the raw Lookup index
 // equal to (or greater than) Length.  The clamp below prevents the
 // resulting index out-of-range panic.
-func GetCharacter() (*Data, error) {
+func GetCharacter(l *zap.SugaredLogger) (*Data, error) {
 	dat, err := os.ReadFile("book.txt")
 	if err != nil {
 		return nil, fmt.Errorf("error reading file: %w", err)
@@ -113,6 +119,6 @@ func GetCharacter() (*Data, error) {
 
 	d.Character = rune(text[d.Lookup])
 
-	log.Debugf(d.Log())
+	l.Debugf("%s", d.Log())
 	return d, nil
 }
