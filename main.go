@@ -22,12 +22,18 @@ import (
 
 // main wires dependencies and blocks until SIGINT/SIGTERM.
 func main() {
+	os.Exit(run())
+}
+
+// run executes the program, returning the process exit code so that
+// deferred cleanup runs before os.Exit is called.
+func run() int {
 	log, err := logging.NewLogger("numbers")
 	if err != nil {
 		fallback, ferr := zap.NewProduction()
 		if ferr != nil {
 			fmt.Fprintf(os.Stderr, "logger init: %v / %v\n", err, ferr)
-			os.Exit(1)
+			return 1
 		}
 		fallback.Warn("falling back to zap.NewProduction logger", zap.Error(err))
 		log = fallback.Sugar()
@@ -42,7 +48,7 @@ func main() {
 	exporter, err := otelprom.New(otelprom.WithRegisterer(registry))
 	if err != nil {
 		log.Errorw("otel prometheus exporter", zap.Error(err))
-		os.Exit(1)
+		return 1
 	}
 	mp := sdkmetric.NewMeterProvider(sdkmetric.WithReader(exporter))
 	otel.SetMeterProvider(mp)
@@ -90,5 +96,7 @@ func main() {
 	defer cancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Errorw("http shutdown", zap.Error(err))
+		return 1
 	}
+	return 0
 }
