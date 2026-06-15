@@ -13,7 +13,7 @@ COPY . .
 RUN go build -ldflags="-s -w" -o /numbers .
 
 # ── Runtime image ─────────────────────────────────────────────────────────────
-FROM alpine:3.23
+FROM alpine:3.24
 
 LABEL org.opencontainers.image.source=https://github.com/icco/numbers
 LABEL org.opencontainers.image.description="Kind of a puzzle."
