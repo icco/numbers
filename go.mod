@@ -3,7 +3,7 @@ module github.com/icco/numbers
 go 1.26.2
 
 require (
-	github.com/go-chi/chi/v5 v5.3.1
+	github.com/go-chi/chi/v5 v5.3.2
 	github.com/icco/gutil v1.0.11
 	github.com/prometheus/client_golang v1.24.1
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.70.0
