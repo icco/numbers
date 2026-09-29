@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/icco/gutil/logging"
+	"go.icco.me/gutil/logging"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 	"go.uber.org/zap"
