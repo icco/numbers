@@ -4,7 +4,7 @@ Guidance for coding agents working on numbers.
 
 ## Project Overview
 
-Microservice written in Go (`github.com/icco/numbers`) providing number manipulation, facts, and mathematical endpoints over HTTP.
+Microservice written in Go (`go.icco.me/numbers`) providing number manipulation, facts, and mathematical endpoints over HTTP.
 
 ## Commands
 

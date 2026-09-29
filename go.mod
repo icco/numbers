@@ -1,4 +1,4 @@
-module github.com/icco/numbers
+module go.icco.me/numbers
 
 go 1.26.2
 
